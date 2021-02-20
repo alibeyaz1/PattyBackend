@@ -26,7 +26,7 @@ mongoose.set("useUnifiedTopology", true);
 var mongooseOptions = { useNewUrlParser: true };
 
 mongoose
-  .connect("MongoDB Connection String", mongooseOptions)
+  .connect("mongodb+srv://patty:Patty1234.@cluster0.vprjy.mongodb.net/myFirstDatabase?retryWrites=true&w=majority", mongooseOptions)
   .then(() => {
     console.log("connection Successful!");
   })
