@@ -8,7 +8,7 @@ const userSchema = mongoose.Schema({
     isSeller: { type: Boolean, required: true },
     address: { type: String, required: true },
     minOrderPrice: { type: Number },
-    favorites: { type: [ref(product)] },
+    favorites: { type: [String] },
 });
 
 module.exports = mongoose.model('User', userSchema);

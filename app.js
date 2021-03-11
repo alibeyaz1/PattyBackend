@@ -3,7 +3,10 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 
-const exampleRoutes = require("./routes/examples");
+const productRoutes = require("./routes/products");
+const userRoutes = require("./routes/users");
+const ratingRoutes = require("./routes/ratings");
+const orderRoutes = require("./routes/orders");
 
 const app = express();
 
@@ -37,6 +40,9 @@ mongoose
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use("/api/example", exampleRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/auth", userRoutes);
+app.use("/api/ratings", ratingRoutes);
+app.use("/api/orders", orderRoutes);
 
 module.exports = app;
