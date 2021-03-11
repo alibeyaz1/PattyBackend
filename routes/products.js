@@ -1,4 +1,5 @@
 const express = require("express");
+const multer = require("multer");
 
 const checkAuth = require("../middleware/check-auth");
 const Product = require("../models/product");
