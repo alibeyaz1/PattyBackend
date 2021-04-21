@@ -10,6 +10,7 @@ const productSchema = mongoose.Schema({
     isWeight: { type: Boolean, required: true },
     ingredients: { type: [String], required: true },
     imagePath: { type: String, required: true },
+    sold: { type: Number },
 });
 
 module.exports = mongoose.model('Product', productSchema);

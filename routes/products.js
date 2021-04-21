@@ -1,3 +1,4 @@
+const { response } = require("express");
 const express = require("express");
 const multer = require("multer");
 
@@ -41,6 +42,27 @@ router.get("", (req, res, next) => {
     });
 });
 
+router.get("/bestseller", (req, res, next) => {
+    Product.find().then(response => {
+        let bestSellerCount = 0;
+        let bestSellerId = "";
+        for (let i = 0; i < response.length; i++) {
+            if (response[i].sold > bestSellerCount) {
+                bestSellerCount = response[i].sold;
+                bestSellerId = response[i]._id;
+            }
+        }
+
+        if (bestSellerCount === 0) {
+            res.status(404).json({ message: "No bestsellers" });
+        } else {
+            Product.findById(bestSellerId).then(bestSellerResponse => {
+                res.status(200).json(bestSellerResponse);
+            });
+        }
+    });
+});
+
 router.get("/:id", (req, res, next) => {
     Product.findById(req.params.id).then(response => {
         if (response) {
@@ -69,6 +91,7 @@ router.post(
                 isWeight: req.body.isWeight,
                 ingredients: req.body.ingredients,
                 imagePath: url + "/images/" + req.file.filename,
+                sold: 0
             });
 
             product.save().then(result => {

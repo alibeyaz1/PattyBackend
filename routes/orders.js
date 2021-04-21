@@ -2,6 +2,7 @@ const express = require("express");
 
 const checkAuth = require("../middleware/check-auth");
 const Order = require("../models/order");
+const product = require("../models/product");
 
 const router = express.Router();
 
@@ -44,6 +45,9 @@ router.post(
             });
 
             order.save().then(result => {
+                for (let i = 0; i < order.products.length; i++) {
+                    product.updateOne({ _id: order.products[i] }, { $inc: { sold: 1 } });
+                }
                 res.status(201).json({
                     message: "Order Added Successfully!",
                     order: {
