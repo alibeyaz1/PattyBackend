@@ -8,8 +8,7 @@ const router = express.Router();
 
 router.get("", (req, res, next) => {
     Order.find().then(response => {
-        res
-            .status(200)
+        res.status(200)
             .json({ message: "Order Fetched Successfully!", order: response });
     });
 });
