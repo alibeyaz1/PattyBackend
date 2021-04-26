@@ -6,11 +6,19 @@ const product = require("../models/product");
 
 const router = express.Router();
 
-router.get("", (req, res, next) => {
-    Order.find().then(response => {
-        res.status(200)
-            .json({ message: "Order Fetched Successfully!", order: response });
-    });
+router.get("", checkAuth, (req, res, next) => {
+    const isSeller = req.params.isSeller;
+    if (isSeller) {
+        Order.find({ seller: req.params.userId }).then(response => {
+            res.status(200)
+                .json({ message: "Orders Fetched Successfully!", orders: response });
+        });
+    } else {
+        Order.find({ customer: req.params.userId }).then(response => {
+            res.status(200)
+                .json({ message: "Orders Fetched Successfully!", orders: response });
+        });
+    }
 });
 
 router.get("/:id", (req, res, next) => {

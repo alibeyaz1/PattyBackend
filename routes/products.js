@@ -35,11 +35,21 @@ const storage = multer.diskStorage({
 });
 
 router.get("", (req, res, next) => {
-    Product.find().then(response => {
-        res
-            .status(200)
-            .json({ message: "Product Fetched Successfully!", product: response });
-    });
+    const isSeller = req.params.isSeller;
+
+    if (isSeller) {
+        Product.find({ seller: req.params.userId }).then(response => {
+            res
+                .status(200)
+                .json({ message: "Product Fetched Successfully!", product: response });
+        });
+    } else {
+        Product.find().then(response => {
+            res
+                .status(200)
+                .json({ message: "Product Fetched Successfully!", product: response });
+        });
+    }
 });
 
 router.get("/bestseller", (req, res, next) => {
