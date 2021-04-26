@@ -8,7 +8,7 @@ const User = require("../models/user");
 const router = express.Router();
 
 router.post("/signup", (req, res, next) => {
-    console.log(req.body.email);
+    console.log(req.body.password);
     bcrypt
         .hash(req.body.password, 10)
         .then(hash => {
@@ -38,7 +38,7 @@ router.post("/signup", (req, res, next) => {
 
 router.post("/login", (req, res, next) => {
     let fetchedUser;
-    User.findOne({ userName: req.body.userName })
+    User.findOne({ email: req.body.email })
         .then(user => {
             if (!user) {
                 return res.status(401).json({
