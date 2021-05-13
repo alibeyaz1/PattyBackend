@@ -50,22 +50,13 @@ router.get('', (req, res, next) => {
 });
 
 router.get('/bestseller', (req, res, next) => {
-  Product.find().then((response) => {
-    let bestSellerIds = [];
-    for (let i = 0; i < response.length; i++) {
-      if (response[i].sold > 10) {
-        bestSellerIds.push(response[i]._id);
-      }
-    }
-
-    if (bestSellerCount === 0) {
-      res.status(404).json({ message: 'No bestsellers' });
-    } else {
+  Product.find({ sold: { $gte: 10 } })
+    .limit(7)
+    .then((response) => {
       res
         .status(200)
-        .json({ message: 'Best Sellers fetched!', products: bestSellerIds });
-    }
-  });
+        .json({ message: 'Best Sellers fetched!', products: response });
+    });
 });
 
 router.get('/:id', (req, res, next) => {
