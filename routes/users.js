@@ -13,6 +13,24 @@ router.get('/sellers', (req, res, next) => {
   });
 });
 
+router.put('/change-adress', checkAuth, (req, res, next) => {
+  User.findById(req.params.userId).then((result) => {
+    result.address = req.body.adress;
+    result.save().then((result) => {
+      res.status(200).json({ message: 'Success' });
+    });
+  });
+});
+
+router.put('/change-name', checkAuth, (req, res, next) => {
+  User.findById(req.params.userId).then((result) => {
+    result.name = req.body.name;
+    result.save().then((result) => {
+      res.status(200).json({ message: 'Success' });
+    });
+  });
+});
+
 router.post('/signup', (req, res, next) => {
   console.log(req.body.password);
   bcrypt
@@ -94,7 +112,7 @@ router.post('/login', (req, res, next) => {
 router.post('/newPass', checkAuth, (req, res, next) => {
   let fetchedUser;
 
-  User.findOne({ _id: req.body.userId })
+  User.findOne({ _id: req.params.userId })
     .then((user) => {
       if (!user) {
         res.status(404).json({ message: 'User not found!' });
@@ -129,7 +147,7 @@ router.post('/newPass', checkAuth, (req, res, next) => {
 });
 
 router.delete('/:id', checkAuth, (req, res, next) => {
-  User.deleteOne({ _id: req.params.id }).then((result) => {
+  User.deleteOne({ _id: req.params.userId }).then((result) => {
     res.status(200).json({ message: 'User deleted!' });
   });
 });

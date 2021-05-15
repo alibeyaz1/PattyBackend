@@ -4,28 +4,32 @@ const multer = require('multer');
 
 const checkAuth = require('../middleware/check-auth');
 const Product = require('../models/product');
+const User = require('../models/user');
 
 const router = express.Router();
 
-router.get('', (req, res, next) => {
-  const isSeller = req.params.isSeller;
-
-  if (isSeller) {
-    Product.find({ seller: req.params.userId }).then((response) => {
-      res
-        .status(200)
-        .json({ message: 'Product Fetched Successfully!', product: response });
-    });
-  } else {
-    Product.find().then((response) => {
-      for (let i = 0; i < response.length; i++) {
-        response[i].price = response[i].price.toFixed(2);
-      }
-      res
-        .status(200)
-        .json({ message: 'Product Fetched Successfully!', product: response });
-    });
-  }
+router.get('', checkAuth, (req, res, next) => {
+  User.findById(req.params.userId).then((result) => {
+    const isSeller = result.isSeller;
+    if (isSeller) {
+      Product.find({ seller: req.params.userId }).then((response) => {
+        res.status(200).json({
+          message: 'Product Fetched Successfully!',
+          product: response,
+        });
+      });
+    } else {
+      Product.find().then((response) => {
+        for (let i = 0; i < response.length; i++) {
+          response[i].price = response[i].price.toFixed(2);
+        }
+        res.status(200).json({
+          message: 'Product Fetched Successfully!',
+          product: response,
+        });
+      });
+    }
+  });
 });
 
 router.get('/bestseller', (req, res, next) => {
@@ -60,24 +64,27 @@ router.post('', checkAuth, (req, res, next) => {
       message: 'Required fields are not filled',
     });
   } else {
-    const product = new Product({
-      seller: req.params.userId,
-      name: req.body.name,
-      category: req.body.category,
-      price: req.body.price,
-      description: req.body.description,
-      isWeight: req.body.isWeight,
-      imagePath: req.body.imageUrl,
-      sold: 0,
-    });
+    User.findById(req.params.userId).then((result) => {
+      const product = new Product({
+        seller: req.params.userId,
+        sellerName: result.name,
+        name: req.body.name,
+        category: req.body.category,
+        price: req.body.price,
+        description: req.body.description,
+        isWeight: req.body.isWeight,
+        imagePath: req.body.imageUrl,
+        sold: 0,
+      });
 
-    product.save().then((result) => {
-      res.status(201).json({
-        message: 'Product Added Successfully!',
-        product: {
-          ...result,
-          id: result._id,
-        },
+      product.save().then((result) => {
+        res.status(201).json({
+          message: 'Product Added Successfully!',
+          product: {
+            ...result,
+            id: result._id,
+          },
+        });
       });
     });
   }

@@ -3,6 +3,7 @@ const user = require('./user');
 
 const productSchema = mongoose.Schema({
   seller: { type: String, required: true },
+  sellerName: { type: String, required: true },
   name: { type: String, required: true },
   category: { type: String, required: true },
   price: { type: Number, required: true },

@@ -2,27 +2,30 @@ const express = require('express');
 
 const checkAuth = require('../middleware/check-auth');
 const Order = require('../models/order');
-const product = require('../models/product');
+const User = require('../models/user');
 
 const router = express.Router();
 
 router.get('', checkAuth, (req, res, next) => {
-  const isSeller = req.params.isSeller;
-  if (isSeller) {
-    Order.find({ seller: req.params.userId })
-      .limit(7)
-      .then((response) => {
+  User.findById(req.params.userId).then((result) => {
+    const isSeller = result.isSeller;
+    if (isSeller) {
+      Order.find({ seller: req.params.userId })
+        .limit(7)
+        .then((response) => {
+          res.status(200).json({
+            message: 'Orders Fetched Successfully!',
+            orders: response,
+          });
+        });
+    } else {
+      Order.find({ customer: req.params.userId }).then((response) => {
         res
           .status(200)
           .json({ message: 'Orders Fetched Successfully!', orders: response });
       });
-  } else {
-    Order.find({ customer: req.params.userId }).then((response) => {
-      res
-        .status(200)
-        .json({ message: 'Orders Fetched Successfully!', orders: response });
-    });
-  }
+    }
+  });
 });
 
 router.get('/count', (req, res, next) => {
@@ -171,7 +174,7 @@ router.post('', checkAuth, (req, res, next) => {
     });
   } else {
     const order = new Order({
-      date: req.body.date,
+      date: new Date(),
       customer: req.body.customer,
       products: req.body.products,
       totalPrice: req.body.totalPrice,
