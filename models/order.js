@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const orderSchema = mongoose.Schema(
   {
     seller: { type: String, required: true },
+    sellerName: { type: String, required: true },
     date: { type: Date, required: true },
     customer: { type: String, required: true },
     customerName: { type: String, required: true },

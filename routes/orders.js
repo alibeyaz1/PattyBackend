@@ -159,7 +159,7 @@ router.get('/count', checkAuth, (req, res, next) => {
 router.get('/:id', (req, res, next) => {
   Order.findById(req.params.id).then((response) => {
     if (response) {
-      res.status(200).json(response);
+      res.status(200).json({ order: response });
     } else {
       res.status(404).json({ message: 'Order Not Found!' });
     }
@@ -179,28 +179,31 @@ router.post('', checkAuth, (req, res, next) => {
           .status(400)
           .json({ message: 'You should enter your adress before ordering' });
       }
-      const order = new Order({
-        customer: req.params.userId,
-        seller: req.body.seller,
-        date: Date.now(),
-        customerName: result.name,
-        address: result.address,
-        products: req.body.products,
-        totalPrice: req.body.totalPrice,
-      });
+      User.findById(req.body.seller).then((response) => {
+        const order = new Order({
+          customer: req.params.userId,
+          seller: req.body.seller,
+          sellerName: response.name,
+          date: Date.now(),
+          customerName: result.name,
+          address: result.address,
+          products: req.body.products,
+          totalPrice: req.body.totalPrice,
+        });
 
-      order.save().then((result) => {
-        console.log(result);
-        for (let i = 0; i < order.products.length; i++) {
-          Product.updateOne(
-            { _id: order.products[i] },
-            { $inc: { sold: 1 } }
-          ).then((result) => {
-            res.status(201).json({
-              message: 'Order Added Successfully!',
+        order.save().then((result) => {
+          console.log(result);
+          for (let i = 0; i < order.products.length; i++) {
+            Product.updateOne(
+              { _id: order.products[i] },
+              { $inc: { sold: 1 } }
+            ).then((result) => {
+              res.status(201).json({
+                message: 'Order Added Successfully!',
+              });
             });
-          });
-        }
+          }
+        });
       });
     });
   }
