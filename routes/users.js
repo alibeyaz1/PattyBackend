@@ -13,6 +13,12 @@ router.get('/sellers', (req, res, next) => {
   });
 });
 
+router.get('/seller/:id', (req, res, next) => {
+  User.findById(req.params.id).then((response) => {
+    res.status(200).json({ seller: response });
+  });
+});
+
 router.put('/change-adress', checkAuth, (req, res, next) => {
   User.findById(req.params.userId).then((result) => {
     result.address = req.body.adress;

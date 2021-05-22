@@ -2,6 +2,7 @@ const express = require('express');
 
 const checkAuth = require('../middleware/check-auth');
 const Order = require('../models/order');
+const Product = require('../models/product');
 const User = require('../models/user');
 
 const router = express.Router();
@@ -28,27 +29,28 @@ router.get('', checkAuth, (req, res, next) => {
   });
 });
 
-router.get('/count', (req, res, next) => {
+router.get('/count', checkAuth, (req, res, next) => {
   const filter = req.query.filter;
 
   switch (filter) {
     case 'daily':
       Order.find({
         seller: req.params.userId,
-        created_at: {
-          $gte: new Date(),
-          $lt: new Date(),
+        date: {
+          $gte: new Date().toDateString(),
+          $lte: Date.now(),
         },
       })
         .count()
         .then((response) => {
           Order.find({
             seller: req.params.userId,
-            created_at: {
-              $gte: new Date(),
-              $lt: new Date(),
+            date: {
+              $gte: new Date().toDateString(),
+              $lte: Date.now(),
             },
           }).then((result) => {
+            console.log(result);
             let total = 0;
             for (let i = 0; i < result.length; i++) {
               total += result[i].totalPrice;
@@ -66,18 +68,18 @@ router.get('/count', (req, res, next) => {
     case 'weekly':
       Order.find({
         seller: req.params.userId,
-        created_at: {
-          $gte: new Date() - 7,
-          $lt: new Date(),
+        date: {
+          $gte: new Date().setDate(new Date().getDate() - 7),
+          $lt: Date.now(),
         },
       })
         .count()
         .then((response) => {
           Order.find({
             seller: req.params.userId,
-            created_at: {
-              $gte: new Date() - 7,
-              $lt: new Date(),
+            date: {
+              $gte: new Date().setDate(new Date().getDate() - 7),
+              $lte: Date.now(),
             },
           }).then((result) => {
             let total = 0;
@@ -97,18 +99,18 @@ router.get('/count', (req, res, next) => {
     case 'monthly':
       Order.find({
         seller: req.params.userId,
-        created_at: {
-          $gte: new Date() - 30,
-          $lt: new Date(),
+        date: {
+          $gte: new Date().setDate(new Date().getDate() - 30),
+          $lte: Date.now(),
         },
       })
         .count()
         .then((response) => {
           Order.find({
             seller: req.params.userId,
-            created_at: {
-              $gte: new Date() - 30,
-              $lt: new Date(),
+            date: {
+              $gte: new Date().setDate(new Date().getDate() - 30),
+              $lt: Date.now(),
             },
           }).then((result) => {
             let total = 0;
@@ -131,6 +133,7 @@ router.get('/count', (req, res, next) => {
       })
         .count()
         .then((response) => {
+          console.log(response);
           Order.find({
             seller: req.params.userId,
           }).then((result) => {
@@ -164,35 +167,40 @@ router.get('/:id', (req, res, next) => {
 });
 
 router.post('', checkAuth, (req, res, next) => {
-  if (!req.body.customer || !req.body.seller || !req.body.comment) {
+  if (!req.body.seller || !req.body.totalPrice) {
     res.status(400).json({
       message: 'Required fields are not filled',
     });
-  } else if (req.body.point < 0 || req.body.point > 5) {
-    res.status(400).json({
-      message: 'Point is not valid',
-    });
   } else {
-    const order = new Order({
-      date: new Date(),
-      customer: req.body.customer,
-      products: req.body.products,
-      totalPrice: req.body.totalPrice,
-    });
-
-    order.save().then((result) => {
-      for (let i = 0; i < order.products.length; i++) {
-        order.product[i].updateOne(
-          { _id: order.products[i] },
-          { $inc: { sold: 1 } }
-        );
+    let totalPrice = 0;
+    User.findById(req.params.userId).then((result) => {
+      if (!result.address) {
+        return res
+          .status(400)
+          .json({ message: 'You should enter your adress before ordering' });
       }
-      res.status(201).json({
-        message: 'Order Added Successfully!',
-        order: {
-          ...result,
-          id: result._id,
-        },
+      const order = new Order({
+        customer: req.params.userId,
+        seller: req.body.seller,
+        date: Date.now(),
+        customerName: result.name,
+        address: result.address,
+        products: req.body.products,
+        totalPrice: req.body.totalPrice,
+      });
+
+      order.save().then((result) => {
+        console.log(result);
+        for (let i = 0; i < order.products.length; i++) {
+          Product.updateOne(
+            { _id: order.products[i] },
+            { $inc: { sold: 1 } }
+          ).then((result) => {
+            res.status(201).json({
+              message: 'Order Added Successfully!',
+            });
+          });
+        }
       });
     });
   }

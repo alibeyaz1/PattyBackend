@@ -32,6 +32,12 @@ router.get('', checkAuth, (req, res, next) => {
   });
 });
 
+router.get('/seller/:sellerId', (req, res, next) => {
+  Product.find({ seller: req.params.sellerId }).then((response) => {
+    res.status(200).json({ products: response });
+  });
+});
+
 router.get('/bestseller', (req, res, next) => {
   Product.find({ sold: { $gte: 10 } })
     .limit(7)
@@ -92,35 +98,28 @@ router.post('', checkAuth, (req, res, next) => {
 
 router.put('/:id', checkAuth, (req, res, next) => {
   if (
-    !req.body.seller ||
     !req.body.name ||
     !req.body.category ||
     !req.body.price ||
-    !req.body.description ||
-    req.body.ingredients.length == 0
+    !req.body.description
   ) {
     res.status(400).json({
       message: 'Required fields are not filled',
     });
   } else {
-    const product = new Product({
-      seller: req.body.seller,
+    const product = {
       name: req.body.name,
       category: req.body.category,
       price: req.body.price,
       description: req.body.description,
       isWeight: req.body.isWeight,
       imagePath: req.body.imageUrl,
-    });
+    };
 
     Product.updateOne({ _id: req.params.id }, product)
       .then((result) => {
         res.status(200).json({
           message: 'Update Successful!',
-          product: {
-            ...result,
-            id: result.id,
-          },
         });
       })
       .catch((err) => {
