@@ -173,37 +173,36 @@ router.post('', checkAuth, async (req, res, next) => {
     });
   } else {
     let totalPrice = 0;
-    User.findById(req.params.userId).then((result) => {
-      if (!result.address) {
-        return res
-          .status(400)
-          .json({ message: 'You should enter your adress before ordering' });
-      }
-      User.findById(req.body.seller).then((response) => {
-        const order = new Order({
-          customer: req.params.userId,
-          seller: req.body.seller,
-          sellerName: response.name,
-          date: Date.now(),
-          customerName: result.name,
-          address: result.address,
-          products: req.body.products,
-          totalPrice: req.body.totalPrice,
-        });
+    const buyer = await User.findById(req.params.userId);
+    if (!buyer.address) {
+      return res
+        .status(400)
+        .json({ message: 'You should enter your adress before ordering' });
+    }
+    const seller = User.findById(req.body.seller);
 
-        order.save().then((result) => {
-          console.log(result);
-          for (let i = 0; i < order.products.length; i++) {
-            await Product.updateOne(
-              { _id: order.products[i] },
-              { $inc: { sold: 1 } }
-            );
-          }
-          res.status(201).json({
-            message: 'Order Added Successfully!',
-          });
-        });
-      });
+    const order = new Order({
+      customer: req.params.userId,
+      seller: req.body.seller,
+      sellerName: seller.name,
+      date: Date.now(),
+      customerName: buyer.name,
+      address: buyer.address,
+      products: req.body.products,
+      totalPrice: req.body.totalPrice,
+    });
+
+    await order.save();
+
+    for (let i = 0; i < order.products.length; i++) {
+      await Product.updateOne(
+        { _id: order.products[i] },
+        { $inc: { sold: 1 } }
+      );
+    }
+
+    res.status(201).json({
+      message: 'Order Added Successfully!',
     });
   }
 });
