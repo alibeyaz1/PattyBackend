@@ -59,7 +59,7 @@ router.get('/count', checkAuth, (req, res, next) => {
             res.status(200).json({
               message: 'Orders Fetched Successfully!',
               orderCount: response,
-              orderTotal: total,
+              orderTotal: total.toFixed(2),
             });
           });
         });
@@ -90,7 +90,7 @@ router.get('/count', checkAuth, (req, res, next) => {
             res.status(200).json({
               message: 'Orders Fetched Successfully!',
               orderCount: response,
-              orderTotal: total,
+              orderTotal: total.toFixed(2),
             });
           });
         });
@@ -121,7 +121,7 @@ router.get('/count', checkAuth, (req, res, next) => {
             res.status(200).json({
               message: 'Orders Fetched Successfully!',
               orderCount: response,
-              orderTotal: total,
+              orderTotal: total.toFixed(2),
             });
           });
         });
@@ -145,7 +145,7 @@ router.get('/count', checkAuth, (req, res, next) => {
             res.status(200).json({
               message: 'Orders Fetched Successfully!',
               orderCount: response,
-              orderTotal: total,
+              orderTotal: total.toFixed(2),
             });
           });
         });
