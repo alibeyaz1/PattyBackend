@@ -166,7 +166,7 @@ router.get('/:id', (req, res, next) => {
   });
 });
 
-router.post('', checkAuth, (req, res, next) => {
+router.post('', checkAuth, async (req, res, next) => {
   if (!req.body.seller || !req.body.totalPrice) {
     res.status(400).json({
       message: 'Required fields are not filled',
@@ -194,15 +194,14 @@ router.post('', checkAuth, (req, res, next) => {
         order.save().then((result) => {
           console.log(result);
           for (let i = 0; i < order.products.length; i++) {
-            Product.updateOne(
+            await Product.updateOne(
               { _id: order.products[i] },
               { $inc: { sold: 1 } }
-            ).then((result) => {
-              res.status(201).json({
-                message: 'Order Added Successfully!',
-              });
-            });
+            );
           }
+          res.status(201).json({
+            message: 'Order Added Successfully!',
+          });
         });
       });
     });
